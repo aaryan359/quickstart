@@ -15,6 +15,18 @@ for i in $(seq 1 30); do
   echo "  attempt $i/30 – not ready yet, sleeping 10s..."
   sleep 10
 done
+# ── Enable Swap Space to Prevent OOM ──────────────────────────────────────────
+# t3.micro has only 1GB RAM. Compiling llama-cpp-python needs ~3GB virtual memory.
+if [ ! -f /swapfile ]; then
+  echo "Creating a 3GB swap file..."
+  fallocate -l 3G /swapfile
+  chmod 600 /swapfile
+  mkswap /swapfile
+  swapon /swapfile
+  echo "/swapfile none swap sw 0 0" >> /etc/fstab
+  echo "Swap enabled successfully."
+fi
+
 MODEL_FILE="qwen2-0_5b-instruct-q4_k_m.gguf"
 MODEL_DIR="$APP_DIR/workers/inference-worker"
 

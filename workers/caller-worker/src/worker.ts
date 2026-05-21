@@ -20,15 +20,33 @@ iii.registerFunction(
 iii.registerFunction(
   'http::run_inference',
   async (payload: { body: { messages?: Array<Record<string, unknown>>; prompt?: string } }) => {
-    const result = await iii.trigger({
-      function_id: 'inference::get_response',
-      payload: payload.body,
-    });
-    return {
-      status_code: 200,
-      body: result,
-      headers: { 'Content-Type': 'application/json' },
-    };
+    try {
+      const result = await iii.trigger({
+        function_id: 'inference::get_response',
+        payload: payload.body,
+      });
+      // If result is an Error object, surface it properly
+      if (result instanceof Error) {
+        return {
+          status_code: 503,
+          body: { error: result.message },
+          headers: { 'Content-Type': 'application/json' },
+        };
+      }
+      return {
+        status_code: 200,
+        body: result,
+        headers: { 'Content-Type': 'application/json' },
+      };
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      logger.error('http::run_inference failed', { error: message });
+      return {
+        status_code: 503,
+        body: { error: message },
+        headers: { 'Content-Type': 'application/json' },
+      };
+    }
   },
 );
 
