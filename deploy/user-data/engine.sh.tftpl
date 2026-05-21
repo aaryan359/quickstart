@@ -9,6 +9,8 @@ apt-get install -y curl git
 sudo -u ubuntu bash -lc 'curl -fsSL https://install.iii.dev/iii/main/install.sh | sh'
 
 rm -rf "$APP_DIR"
+mkdir -p "$APP_DIR"
+chown ubuntu:ubuntu "$APP_DIR"
 sudo -u ubuntu git clone --branch "${repo_ref}" "${repo_url}" "$APP_DIR"
 chown -R ubuntu:ubuntu "$APP_DIR"
 

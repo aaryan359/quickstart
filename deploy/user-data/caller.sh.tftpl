@@ -9,6 +9,8 @@ curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
 apt-get install -y nodejs
 
 rm -rf "$APP_DIR"
+mkdir -p "$APP_DIR"
+chown ubuntu:ubuntu "$APP_DIR"
 sudo -u ubuntu git clone --branch "${repo_ref}" "${repo_url}" "$APP_DIR"
 chown -R ubuntu:ubuntu "$APP_DIR"
 
