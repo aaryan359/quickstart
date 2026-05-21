@@ -4,6 +4,20 @@ This repository contains the complete Infrastructure-as-Code (IaC) and deploymen
 
 ---
 
+> [!IMPORTANT]
+> **⚡ LIVE API ENDPOINT AVAILABLE (Valid until May 25, 2026)**
+> You can test my live running deployment end-to-end right now without provisioning anything! 
+> 
+> Simply run this command from any terminal on your local machine:
+> ```bash
+> curl -s -X POST http://13.49.72.22/v1/chat/completions \
+>   -H "Content-Type: application/json" \
+>   -d '{"messages": [{"role": "user", "content": "What is 2 + 2?"}]}' | jq .
+> ```
+> *Note: To avoid ongoing AWS hosting charges, this live environment will be active until **May 25, 2026**, after which the resources will be permanently destroyed.*
+
+---
+
 ## Architecture Overview
 
 The architecture is designed with **network isolation** as a first-tier priority. All core execution VMs live inside a fully private subnet, isolated from the public internet. Only a hardened API reverse-proxy VM is exposed to the public.
