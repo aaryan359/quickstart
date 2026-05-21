@@ -14,8 +14,8 @@ locals {
       subnet     = "private"
       private_ip = "10.0.2.10"
     }
-    math = {
-      name       = "${var.project_name}-math"
+    inference = {
+      name       = "${var.project_name}-inference"
       subnet     = "private"
       private_ip = "10.0.2.20"
     }
@@ -209,7 +209,7 @@ resource "aws_instance" "vm" {
   for_each = local.instances
 
   ami                         = data.aws_ami.ubuntu.id
-  instance_type               = var.instance_type
+  instance_type               = each.key == "inference" ? var.inference_instance_type : var.instance_type
   key_name                    = var.ssh_key_name
   subnet_id                   = each.value.subnet == "public" ? aws_subnet.public.id : aws_subnet.private.id
   vpc_security_group_ids      = each.value.subnet == "public" ? [aws_security_group.api.id] : [aws_security_group.private.id]

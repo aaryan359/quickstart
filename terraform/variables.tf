@@ -35,9 +35,15 @@ variable "availability_zone" {
 }
 
 variable "instance_type" {
-  description = "EC2 instance type for each VM."
+  description = "EC2 instance type for API, engine, and caller VMs."
   type        = string
   default     = "t3.micro"
+}
+
+variable "inference_instance_type" {
+  description = "EC2 instance type for the inference worker VM. PyTorch/Transformers needs more memory than t3.micro."
+  type        = string
+  default     = "t3.large"
 }
 
 variable "ssh_key_name" {

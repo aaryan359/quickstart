@@ -2,7 +2,7 @@
   "name": "caller-worker",
   "version": "0.1.0",
   "type": "module",
-  "description": "Calls math::add in the Python worker and returns the result",
+  "description": "Calls the Python inference worker and returns the result",
   "scripts": {
     "dev": "tsx watch src/worker.ts",
     "build": "tsc"

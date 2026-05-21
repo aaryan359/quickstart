@@ -6,9 +6,9 @@ output "api_public_ip" {
 output "private_instance_ips" {
   description = "Private IPs for the internal engine and worker VMs."
   value = {
-    engine = aws_instance.vm["engine"].private_ip
-    math   = aws_instance.vm["math"].private_ip
-    caller = aws_instance.vm["caller"].private_ip
+    engine    = aws_instance.vm["engine"].private_ip
+    inference = aws_instance.vm["inference"].private_ip
+    caller    = aws_instance.vm["caller"].private_ip
   }
 }
 

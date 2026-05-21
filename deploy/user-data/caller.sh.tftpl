@@ -3,7 +3,17 @@ set -euxo pipefail
 
 APP_DIR="${app_dir}"
 
-apt-get update
+# ── Wait for NAT Gateway to be ready ────────────────────────────────────────
+echo "Waiting for outbound internet connectivity via NAT Gateway..."
+for i in $(seq 1 30); do
+  if curl -sf --max-time 5 https://checkip.amazonaws.com > /dev/null 2>&1; then
+    echo "NAT Gateway is ready (attempt $i)."
+    break
+  fi
+  echo "  attempt $i/30 – not ready yet, sleeping 10s..."
+  sleep 10
+done
+
 apt-get install -y ca-certificates curl git
 curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
 apt-get install -y nodejs

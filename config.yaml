@@ -1,4 +1,5 @@
 # iii engine configuration
+# used for local development and testing, not recommended for production use
 # Docs: https://iii.dev/docs/how-to/configure-engine
 workers:
   - name: iii-observability
@@ -18,8 +19,6 @@ workers:
     config:
       adapter:
         name: builtin
-  - name: math-worker
-    worker_path: /home/aaryan/Desktop/quickstart/workers/math-worker
   - name: caller-worker
     worker_path: /home/aaryan/Desktop/quickstart/workers/caller-worker
   - name: iii-http
@@ -44,3 +43,5 @@ workers:
         config:
           store_method: file_based
           file_path: ./data/state_store.db
+  - name: inference-worker
+    worker_path: /home/aaryan/Desktop/quickstart/workers/inference-worker

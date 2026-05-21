@@ -7,7 +7,7 @@ does after it boots:
 
 - `user-data/api.sh.tftpl` configures Nginx on the public API VM.
 - `user-data/engine.sh.tftpl` starts the iii engine and built-in workers.
-- `user-data/math.sh.tftpl` starts the Python math worker.
+- `user-data/inference.sh.tftpl` starts the Python inference worker.
 - `user-data/caller.sh.tftpl` starts the TypeScript caller worker.
 
 Terraform will render these templates with the repository URL, branch, install

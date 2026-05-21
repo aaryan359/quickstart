@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+set -euxo pipefail
+
+APP_DIR="${app_dir}"
+
+# ── Wait for NAT Gateway to be ready ────────────────────────────────────────
+# Private-subnet VMs boot before the NAT Gateway finishes activating (~1-2 min).
+# Retry until we can actually reach the internet before running any installs.
+echo "Waiting for outbound internet connectivity via NAT Gateway..."
+for i in $(seq 1 30); do
+  if curl -sf --max-time 5 https://checkip.amazonaws.com > /dev/null 2>&1; then
+    echo "NAT Gateway is ready (attempt $i)."
+    break
+  fi
+  echo "  attempt $i/30 – not ready yet, sleeping 10s..."
+  sleep 10
+done
+MODEL_FILE="qwen2-0_5b-instruct-q4_k_m.gguf"
+MODEL_DIR="$APP_DIR/workers/inference-worker"
+
+apt-get update
+apt-get install -y git python3 python3-pip python3-venv
+
+rm -rf "$APP_DIR"
+mkdir -p "$APP_DIR"
+chown ubuntu:ubuntu "$APP_DIR"
+sudo -u ubuntu git clone --branch "${repo_ref}" "${repo_url}" "$APP_DIR"
+chown -R ubuntu:ubuntu "$APP_DIR"
+
+# Install Python deps (llama-cpp-python, iii-sdk, etc.)
+sudo -u ubuntu bash -lc "cd '$MODEL_DIR' && python3 -m venv .venv && .venv/bin/pip install --upgrade pip && .venv/bin/pip install -r requirements.txt"
+
+# Download the quantized model (~300 MB) from Hugging Face
+# Retry up to 5 times in case of a transient connection error.
+for attempt in 1 2 3 4 5; do
+  sudo -u ubuntu bash -lc "
+    cd '$MODEL_DIR' && \
+    .venv/bin/hf download Qwen/Qwen2-0.5B-Instruct-GGUF '$MODEL_FILE' \
+      --local-dir '$MODEL_DIR'
+  " && break
+  echo "Model download attempt $attempt failed, retrying in 15s..."
+  sleep 15
+done
+
+cat >/etc/systemd/system/iii-inference-worker.service <<SERVICE
+[Unit]
+Description=iii quickstart inference worker
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=ubuntu
+WorkingDirectory=$MODEL_DIR
+Environment=III_URL=ws://${engine_private_ip}:49134
+Environment=MODEL_PATH=$MODEL_DIR/$MODEL_FILE
+Environment=MAX_NEW_TOKENS=256
+Environment=N_CTX=2048
+ExecStart=$MODEL_DIR/.venv/bin/python inference_worker.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+SERVICE
+
+systemctl daemon-reload
+systemctl enable iii-inference-worker
+systemctl restart iii-inference-worker

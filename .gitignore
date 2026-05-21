@@ -388,3 +388,8 @@ target
 
 .vscode
 .mypy*
+
+# Model weights — too large for GitHub (download at deploy time)
+*.gguf
+*.bin
+*.safetensors
