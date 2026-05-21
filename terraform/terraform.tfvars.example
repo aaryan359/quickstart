@@ -4,4 +4,7 @@ instance_type     = "t3.micro"
 project_name      = "iii-quickstart"
 
 ssh_key_name = "quickstart-key"
-my_ip_cidr = "0.0.0.0/0"
+my_ip_cidr   = "0.0.0.0/0"
+
+repo_url = "https://github.com/aaryan359/quickstart.git"
+repo_ref = "main"

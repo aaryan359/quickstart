@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+set -euxo pipefail
+
+apt-get update
+apt-get install -y nginx
+
+cat >/etc/nginx/sites-available/iii-api <<NGINX
+server {
+    listen 80;
+
+    location / {
+        proxy_pass http://${engine_private_ip}:3111;
+        proxy_http_version 1.1;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+    }
+}
+NGINX
+
+ln -sf /etc/nginx/sites-available/iii-api /etc/nginx/sites-enabled/iii-api
+rm -f /etc/nginx/sites-enabled/default
+nginx -t
+systemctl enable nginx
+systemctl restart nginx

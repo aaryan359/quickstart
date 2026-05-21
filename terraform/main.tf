@@ -215,6 +215,13 @@ resource "aws_instance" "vm" {
   vpc_security_group_ids      = each.value.subnet == "public" ? [aws_security_group.api.id] : [aws_security_group.private.id]
   associate_public_ip_address = each.value.subnet == "public"
   private_ip                  = each.value.private_ip
+  user_data_replace_on_change = true
+  user_data = templatefile("${path.module}/../deploy/user-data/${each.key}.sh.tftpl", {
+    app_dir           = "/opt/iii-quickstart"
+    engine_private_ip = local.instances.engine.private_ip
+    repo_ref          = var.repo_ref
+    repo_url          = var.repo_url
+  })
 
   tags = merge(local.common_tags, {
     Name = each.value.name

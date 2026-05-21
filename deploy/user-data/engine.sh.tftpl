@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+set -euxo pipefail
+
+APP_DIR="${app_dir}"
+
+apt-get update
+apt-get install -y curl git
+
+sudo -u ubuntu bash -lc 'curl -fsSL https://install.iii.dev/iii/main/install.sh | sh'
+
+rm -rf "$APP_DIR"
+sudo -u ubuntu git clone --branch "${repo_ref}" "${repo_url}" "$APP_DIR"
+chown -R ubuntu:ubuntu "$APP_DIR"
+
+cat >/etc/systemd/system/iii-engine.service <<SERVICE
+[Unit]
+Description=iii quickstart engine
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=ubuntu
+WorkingDirectory=$APP_DIR
+Environment=PATH=/home/ubuntu/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ExecStart=/home/ubuntu/.local/bin/iii --config config.engine.yaml
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+SERVICE
+
+systemctl daemon-reload
+systemctl enable iii-engine
+systemctl restart iii-engine

@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+set -euxo pipefail
+
+APP_DIR="${app_dir}"
+
+apt-get update
+apt-get install -y ca-certificates curl git
+curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+apt-get install -y nodejs
+
+rm -rf "$APP_DIR"
+sudo -u ubuntu git clone --branch "${repo_ref}" "${repo_url}" "$APP_DIR"
+chown -R ubuntu:ubuntu "$APP_DIR"
+
+sudo -u ubuntu bash -lc "cd '$APP_DIR/workers/caller-worker' && npm install"
+
+cat >/etc/systemd/system/iii-caller-worker.service <<SERVICE
+[Unit]
+Description=iii quickstart caller worker
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=ubuntu
+WorkingDirectory=$APP_DIR/workers/caller-worker
+Environment=III_URL=ws://${engine_private_ip}:49134
+ExecStart=/usr/bin/npx tsx src/worker.ts
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+SERVICE
+
+systemctl daemon-reload
+systemctl enable iii-caller-worker
+systemctl restart iii-caller-worker

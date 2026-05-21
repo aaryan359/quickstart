@@ -49,3 +49,14 @@ variable "my_ip_cidr" {
   description = "Your public IP in CIDR notation for SSH access, for example 1.2.3.4/32."
   type        = string
 }
+
+variable "repo_url" {
+  description = "Git URL for the quickstart repository cloned by EC2 startup scripts."
+  type        = string
+}
+
+variable "repo_ref" {
+  description = "Git branch or tag to deploy."
+  type        = string
+  default     = "main"
+}
